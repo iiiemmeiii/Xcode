@@ -34,57 +34,67 @@ from collections import Counter
 def readFromFile(file) -> str:   
     try :      
         with open(file, "r") as f:
-            # strip supprime le \n final au bout de la ligne
-            return f.readline().rstrip("\n")   
+            return f.read()  
     except FileNotFoundError:
         print(f"{file} not found - verifiy filename")
         return
     
 
 
-def splitText(text: str, sep: str) -> List[str]:
-    return [item for item in re.split(sep, text) if item]
+def extract_words(words) -> List[str]:
+    return re.findall(r"\b\w+\b", words)
 
 
-def CountSentence(text: str) -> int:
-    return len(splitText(text, r"\."))
+def CountSentence(text) -> int:
+    return len([s for s in re.split(r"[!.?]", text)  if s.strip()])
 
 
-def CountWord(text: str) -> int:
-    return len(splitText(text, r"\s"))
+def CountWord(words) -> int:
+    return len(words)
 
 
-def CountChar(text: str) -> int:
-    return len(splitText(text, r"(.)"))
+def CountChar(text) -> int:
+    return len(text)
 
-def ReccurentWord(text: str) -> List[tuple]:
-    listWord = dict(Counter(splitText(text, r"\s")).most_common(5))
-    reccurent = []
-    for k, v in listWord.items() :
-        reccurent.append((k,v))
-    return reccurent
+def ReccurentWord(words) -> dict:
+    return Counter(words).most_common(5)
+    
         
 
-def MostWordLength(text: str) -> str:
-    listWord = splitText(text, r"\s")
-    maxLength =  max(len(w) for w in listWord)
-    word = "".join([word for word in listWord if len(word) == maxLength])
-    return word
+def MostWordLength(words) -> str:
+    return max(words, key=len) 
 
-
+def TableASCII(text: str) -> None :
+    print(f"+{"-"*15}+{"-"*15}+{"-"*15}+{"-"*20}+{"-"*40}+")
+    print(f"|{"Phrases":>10}{"Mots":>16}{"Chars":>15}{"5 Current":>21}{"Longer":>25}{"|":>23}")
+    print(f"+{"-"*15}+{"-"*15}+{"-"*15}+{"-"*20}+{"-"*40}+")
+    
+    words = extract_words(text)
+    
+    s = CountSentence(text)
+    w = CountWord(words)
+    c = CountChar(text)
+    rw = ReccurentWord(words)
+    mw = MostWordLength(words)
+    
+    freq = ", ".join([f"{k}({v})" for k,v in rw])
+    
+    print(f"|{s:>5}{w:>20}{c:>15}{freq:>50}{mw:>40}")
+    
+        
+    
 
 
 def main() -> None:
-    filename = sys.argv[-1]
-    text = readFromFile(filename)
-    s = CountSentence(text)
-    w = CountWord(text)
-    c = CountChar(text)
-    rw = ReccurentWord(text)
-    mw = MostWordLength(text)
-    print(s, w, c, rw, mw)
-   
-
+    
+    args = sys.argv
+    if len(args) == 2:
+        filename = sys.argv[-1]
+        text = readFromFile(filename)
+    else :
+        text = input("Enter your text: ").strip().lower()
+        
+    TableASCII(text)    
 
 if __name__ == "__main__":
     main()
