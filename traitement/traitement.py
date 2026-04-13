@@ -22,37 +22,57 @@ Le programme affiche :
 - Comment nettoyer une chaîne de ses caractères spéciaux ?
 - Explore le module `collections.Counter`
 - Qu'est-ce que `sys.argv` et comment l'utiliser ?
-# ////////////////////////////////////////////////////////
-if sys.arg[2] donc show input
-else if not sys.argv[2] show input
 <>
 """
+
 from typing import List
 import sys, os
 import re
 from collections import Counter
 
 
-def readFromFile(file) -> str:
-    if not os.path.exists(file):
-        print("not exist")
+def readFromFile(file) -> str:   
+    try :      
+        with open(file, "r") as f:
+            # strip supprime le \n final au bout de la ligne
+            return f.readline().rstrip("\n")   
+    except FileNotFoundError:
+        print(f"{file} not found - verifiy filename")
         return
-    with open(file, "r") as f:
-        content = f.readline()
-        return str(content)
-
-def splitFormat(text: str, sep: str) -> List[str]:
-    return re.split(sep, text)
     
-def CountSentence(text: str) -> int :
-    return len([sentence for sentence in splitFormat(text, r"\.") if sentence])
 
-def CountWord(text: str) -> int : 
-    return len([word for word in splitFormat(text, r"\s") if word])
 
-def CountChar(text: str) -> int :
-    return len([char for char in splitFormat(text, r"(.)") if char])
-    
+def splitText(text: str, sep: str) -> List[str]:
+    return [item for item in re.split(sep, text) if item]
+
+
+def CountSentence(text: str) -> int:
+    return len(splitText(text, r"\."))
+
+
+def CountWord(text: str) -> int:
+    return len(splitText(text, r"\s"))
+
+
+def CountChar(text: str) -> int:
+    return len(splitText(text, r"(.)"))
+
+def ReccurentWord(text: str) -> List[tuple]:
+    listWord = dict(Counter(splitText(text, r"\s")).most_common(5))
+    reccurent = []
+    for k, v in listWord.items() :
+        reccurent.append((k,v))
+    return reccurent
+        
+
+def MostWordLength(text: str) -> str:
+    listWord = splitText(text, r"\s")
+    maxLength =  max(len(w) for w in listWord)
+    word = "".join([word for word in listWord if len(word) == maxLength])
+    return word
+
+
+
 
 def main() -> None:
     filename = sys.argv[-1]
@@ -60,8 +80,10 @@ def main() -> None:
     s = CountSentence(text)
     w = CountWord(text)
     c = CountChar(text)
-    
-    print(s,w,c)
+    rw = ReccurentWord(text)
+    mw = MostWordLength(text)
+    print(s, w, c, rw, mw)
+   
 
 
 if __name__ == "__main__":
