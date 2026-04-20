@@ -28,95 +28,123 @@ Recommandé	16 caractères
 Très sécurisé	20+ caractères
 Ultra sécurisé (clés)	32+ caractères
 
-<h1>
+<>
 """
+
 from string import ascii_lowercase, ascii_uppercase, digits, punctuation, Formatter
 import secrets, random
 from typing import Callable, Any, List
 
-fmt : Callable[[str, Any], List[Any]] = lambda text, *args : Formatter().format(text, args)
+fmt: Callable[[str, Any], List[Any]] = lambda text, *args: Formatter().format(
+    text, args
+)
 
 # fmt = Formatter().format
 
-def question(text) -> str :
-    while True :
+
+def question(text) -> str:
+    while True:
         r = input(text).strip().lower()
-        if not r in ("o", "n") :
-            print(fmt("{} Answer Expected : \"o\" or  \"n\" - retry", r))
+        if not r in ("o", "n"):
+            print(fmt('{} Answer Expected : "o" or  "n" - retry', r))
             continue
         return r
-        
 
-def setNumber(text) -> int :
+
+def setNumber(text) -> int:
     while True:
-        try :
+        try:
             n = int(input(text))
-            if n > 0 :
+            if n > 0:
                 return n
             print(fmt("Must be greather 0"))
         except ValueError:
             print(fmt("Not a number - retry"))
-       
-        
-def def_longureur(choix: str, text: str ) -> int :
+
+
+def def_longureur(choix: str, text: str) -> int:
     if choix == "o":
         n = setNumber(text)
         return n
     return random.randint(4, 20)
 
-def def_minuscule(l:int, choix: str) -> str:
-    if choix == "o" : 
+
+def def_minuscule(l: int, choix: str) -> str:
+    if choix == "o":
         return "".join(secrets.choice(ascii_lowercase) for _ in range(l))
     return ""
-        
-    
-def def_majiscule(l:int, choix: str, minus: str) -> str: 
-    if choix == "o" :
+
+
+def def_majiscule(l: int, choix: str, minus: str) -> str:
+    if choix == "o":
         return "".join(secrets.choice(f"{ascii_uppercase}{minus}") for _ in range(l))
     return ""
-        
-    
-def def_digit(l:int, choix: str, minus: str, majus: str) -> str: 
-    if choix == "o" :
+
+
+def def_digit(l: int, choix: str, minus: str, majus: str) -> str:
+    if choix == "o":
         return "".join(secrets.choice(f"{minus}{digits}{majus}") for _ in range(l))
     return ""
-    
-        
-    
-def def_symbol(l:int, choix: str, minus: str, majus: str, digit: str) -> str: 
-    if choix == "o" :
-        return "".join(secrets.choice(f"{punctuation}{digit}{minus}{majus}") for _ in range(l))
+
+
+def def_symbol(l: int, choix: str, minus: str, majus: str, digit: str) -> str:
+    if choix == "o":
+        return "".join(
+            secrets.choice(f"{punctuation}{digit}{minus}{majus}") for _ in range(l)
+        )
     return ""
+
+
+def generate_pwd(count, l, minus, majus, digit, punct):
     
+    return ["".join(secrets.choice(f"{punct}{digit}{minus}{majus}") for _ in range(l)) for _ in range(count)]
+
+def evaluate(pwd: List[str])  -> str :
+    hasMinus = True if ascii_lowercase else False
+    hasMajus = True if ascii_uppercase else False
+    hasDigits = True if digits else False
+    hasPunc = True if punctuation else False
+    
+    msg = ""
+    for p in pwd:
+        if 12<= len(p) < 20 :
+            msg += "Moyen"
+        elif 20<= len(p) < 32 :
+            msg += "Fort"   
+        elif len(p) >= 32:
+            msg += "Tres Fort"
+        else :
+            msg += "Faible"
+        print()
         
-    
-
-
-def main() -> None :
-    a = ""
+def main() -> None:
+    a = None
     while True:
         ql = question("Definir Longueur (o or n) : ")
-        
+
         l = def_longureur(ql, "Votre longueur : ")
-        
-        qm = question("Definir Minnuscule (o or n): ")  
+
+        qm = question("Definir Minnuscule (o or n): ")
         minus = def_minuscule(l, qm)
-        
-        qmaj = question("Definir Majuscule (o or n): ")  
-        maj = def_majiscule(l,qmaj, minus)
-        
-        qdigit = question("Definir digits (o or n): ")  
+
+        qmaj = question("Definir Majuscule (o or n): ")
+        maj = def_majiscule(l, qmaj, minus)
+
+        qdigit = question("Definir digits (o or n): ")
         digit = def_digit(l, qdigit, minus, maj)
-        
-        qponc = question("Definir Ponctuation (o or n): ")  
+
+        qponc = question("Definir Ponctuation (o or n): ")
         ponc = def_symbol(l, qponc, minus, maj, digit)
+
+        n = setNumber("Combien de mot de passe à generer : ")
         
-        a += ponc
+        res = generate_pwd(n, l, minus, maj, digit, ponc)
+        
+        a = res
         
         break
     print(a)
-        
 
-if __name__ == "__main__" :
+
+if __name__ == "__main__":
     main()
-
