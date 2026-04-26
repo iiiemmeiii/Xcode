@@ -16,134 +16,114 @@ Génère des mots de passe aléatoires selon les critères de l'utilisateur :
 - Comment définir les critères d'un "bon" mot de passe ?
 - Explore le module `string` (constantes de caractères)
 
-123456              # Trop court, que des chiffres
-motdepasse          # Mot du dictionnaire
-password123         # Mot commun + chiffres
-azerty              # Motif clavier
-01/01/1990          # Date de naissance
-monchienRex         # Info personnelle + nom animal
-Password123!        # Mot commun + chiffres + spécial (trop prévisible)
-Minimum absolu	12 caractères
-Recommandé	16 caractères
-Très sécurisé	20+ caractères
-Ultra sécurisé (clés)	32+ caractères
-
 <>
 """
 
 from string import ascii_lowercase, ascii_uppercase, digits, punctuation, Formatter
 import secrets, random
 from typing import Callable, Any, List
-
-fmt: Callable[[str, Any], List[Any]] = lambda text, *args: Formatter().format(
-    text, args
-)
-
-# fmt = Formatter().format
+import pyperclip
 
 
-def question(text) -> str:
-    while True:
-        r = input(text).strip().lower()
-        if not r in ("o", "n"):
-            print(fmt('{} Answer Expected : "o" or  "n" - retry', r))
-            continue
-        return r
+fmt: Callable[[str, Any], str] = lambda text, *args: Formatter().format(text, args)
 
 
-def setNumber(text) -> int:
+def number_input(text) -> int:
     while True:
         try:
             n = int(input(text))
-            if n > 0:
+            if n >= 0:
                 return n
             print(fmt("Must be greather 0"))
         except ValueError:
             print(fmt("Not a number - retry"))
 
 
-def def_longureur(choix: str, text: str) -> int:
-    if choix == "o":
-        n = setNumber(text)
-        return n
-    return random.randint(4, 20)
-
-
-def def_minuscule(l: int, choix: str) -> str:
-    if choix == "o":
-        return "".join(secrets.choice(ascii_lowercase) for _ in range(l))
-    return ""
-
-
-def def_majiscule(l: int, choix: str, minus: str) -> str:
-    if choix == "o":
-        return "".join(secrets.choice(f"{ascii_uppercase}{minus}") for _ in range(l))
-    return ""
-
-
-def def_digit(l: int, choix: str, minus: str, majus: str) -> str:
-    if choix == "o":
-        return "".join(secrets.choice(f"{minus}{digits}{majus}") for _ in range(l))
-    return ""
-
-
-def def_symbol(l: int, choix: str, minus: str, majus: str, digit: str) -> str:
-    if choix == "o":
-        return "".join(
-            secrets.choice(f"{punctuation}{digit}{minus}{majus}") for _ in range(l)
-        )
-    return ""
-
-
-def generate_pwd(count, l, minus, majus, digit, punct):
-    
-    return ["".join(secrets.choice(f"{punct}{digit}{minus}{majus}") for _ in range(l)) for _ in range(count)]
-
-def evaluate(pwd: List[str])  -> str :
-    hasMinus = True if ascii_lowercase else False
-    hasMajus = True if ascii_uppercase else False
-    hasDigits = True if digits else False
-    hasPunc = True if punctuation else False
-    
-    msg = ""
-    for p in pwd:
-        if 12<= len(p) < 20 :
-            msg += "Moyen"
-        elif 20<= len(p) < 32 :
-            msg += "Fort"   
-        elif len(p) >= 32:
-            msg += "Tres Fort"
-        else :
-            msg += "Faible"
-        print()
-        
-def main() -> None:
-    a = None
+def choosePwd(n: int, l: int, arr: List[tuple]) -> str:
     while True:
-        ql = question("Definir Longueur (o or n) : ")
+        if not 0 < n <= l:
+            print(f"{n} must be between 1 and {l}")
 
-        l = def_longureur(ql, "Votre longueur : ")
+        return arr[n - 1]
 
-        qm = question("Definir Minnuscule (o or n): ")
-        minus = def_minuscule(l, qm)
 
-        qmaj = question("Definir Majuscule (o or n): ")
-        maj = def_majiscule(l, qmaj, minus)
+def evaluate_force(pwd: str) -> str:
+    has_lower = any(p.islower() for p in pwd)
+    has_upper = any(p.isupper() for p in pwd)
+    has_digits = sum(p.isdigit() for p in pwd)
+    has_punct = sum(p in punctuation for p in pwd)
 
-        qdigit = question("Definir digits (o or n): ")
-        digit = def_digit(l, qdigit, minus, maj)
+    length: int = len(pwd)
+    if length >= 20 and has_lower and has_upper and has_digits >= 3 and has_punct >= 3:
+        msg = "Tres fort"
+    elif (
+        length >= 15 and has_lower and has_upper and has_digits >= 2 and has_punct >= 2
+    ):
+        msg = "Fort"
+    elif length >= 10 and (
+        (has_lower and has_upper) or (has_digits >= 1 and has_punct >= 1)
+    ):
+        msg = "Moyen"
+    else:
+        msg = "Faible"
 
-        qponc = question("Definir Ponctuation (o or n): ")
-        ponc = def_symbol(l, qponc, minus, maj, digit)
+    return msg
 
-        n = setNumber("Combien de mot de passe à generer : ")
-        
-        res = generate_pwd(n, l, minus, maj, digit, ponc)
-        
-        a = res
-        
+
+def welcome() -> None:
+    print("#" * 40)
+    print("WELCOME TO GENESIA")
+    print("#" * 40, end="\n")
+
+
+def main() -> None:
+    welcome()
+    while True:
+
+        q1 = number_input("\nDefinir la longueur du mp (0 = No / 1 = Yes) >> ")
+        if q1 == 1:
+            length = number_input("Votre longueur >> ")
+        else:
+            length = random.randint(5, 30)
+
+        char = ""
+
+        q2 = number_input("\nContenir des minusclues (0 = No / 1 = Yes) >> ")
+        if q2 == 1:
+            char += ascii_lowercase
+
+        q3 = number_input("\nContenir des majuscules (0 = No / 1 = Yes) >> ")
+        if q3 == 1:
+            char += ascii_uppercase
+
+        q4 = number_input("\nContenir des nombres (0 = No / 1 = Yes) >> ")
+        if q4 == 1:
+            char += digits
+
+        q5 = number_input("\nContenir des ponctuation (0 = No / 1 = Yes) >> ")
+        if q5 == 1:
+            char += punctuation
+
+        count = number_input("\nGenerer combien de mp ? >> ")
+
+        # generate: List[str] = [(i,"".join(secrets.choice(char) for _ in range(length))) for i in range(1, count + 1)]
+        generate: List[str] = [
+            "".join(secrets.choice(char) for _ in range(length))
+            for _ in range(1, count + 1)
+        ]
+
+        print("\n Vos mots de passe")
+        for i, p in enumerate(generate, 1):
+            res = evaluate_force(p)
+            print(f"{i} - {p} >>> {res} ")
+
+        choix = number_input(f"\nchoisir un mp entre de 1 et {count} ? >> ")
+
+        print(f"\nYour choice: {generate[choix -1]}")
+
+        # <>
+
         break
-    print(a)
 
 
 if __name__ == "__main__":
