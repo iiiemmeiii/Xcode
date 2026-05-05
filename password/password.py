@@ -1,4 +1,5 @@
 """
+
 **Thème :** Sécurité / Utilitaire
 
 **Description :**
@@ -25,6 +26,7 @@ from typing import List, Tuple
 import pyperclip as pc
 
 
+
 def binary_input(text: str) -> bool:
     """_summary_
     function for asking input
@@ -34,13 +36,19 @@ def binary_input(text: str) -> bool:
     """
     while True:
         try:
+            # convert input in int
             value = int(input(text))
-            if not value in (0, 1):
-                print("Value must be 0 or 1")
-            return bool(value)
+
+            # if value is 0 or 1
+            if value in (0, 1):
+                 # return bool(0) = false or bool(1) = true
+                return bool(value)
+            
+            print("Value must be 0 or 1")           
+        
+        # if is not and int number raiise exeception
         except ValueError:
             print("Not a number - retry")
-
 
 def number_input(text: str, minimum_value: int = 1) -> int:
     """_summary_
@@ -53,9 +61,12 @@ def number_input(text: str, minimum_value: int = 1) -> int:
     while True:
         try:
             value = int(input(text))
-            if not value >= minimum_value:
-                print("Input Value must be greather than 1")
-            return value
+
+            # if condition is true
+            if value >= minimum_value:
+                return value
+            print(f"Input Value must be greather or equal to {minimum_value}")
+        
         except ValueError:
             print("Not a number - retry")
 
@@ -94,13 +105,16 @@ def build_password_chars() -> Tuple[str, List[str]]:
 
     choose_punctuation = binary_input("Choose punctuation char ? (0/1) >>> ")
     if choose_punctuation:
+        # add all punctuation to chars string
         chars += punctuation
+
+        # select one of punctuation and add to array
         required_chars_per_choice.append(secrets.choice(punctuation))
 
     return chars, required_chars_per_choice
 
 
-def genarate_unique_password(length: int, chars: str, required_chars: List[str]) -> str:
+def generate_unique_password(length: int, chars: str, required_chars: List[str]) -> str:
     """_summary_
     Function generate unique secure password based on
     OS Entropie and Secrets module
@@ -119,6 +133,7 @@ def genarate_unique_password(length: int, chars: str, required_chars: List[str])
     if len(chars) == 0:
         raise ValueError("Your Charset is Emply - Retry to chars")
 
+    # [a, T, 1, :] = 3 and length = 2
     if len(required_chars) > length:
         raise ValueError("Insufficient length")
 
@@ -144,22 +159,25 @@ def evaluate_password_force(password: str):
 
     score: int = 0
 
-    if length >= 10:
+    if length >= 8: # score = 1
         score += 1
 
-    if length >= 15:
+    if length >= 12: # score = 1
         score += 1
 
-    if has_lower:
+    if length >= 16: # score = 1
         score += 1
 
-    if has_upper:
+    if has_lower: # score = 1
         score += 1
 
-    if count_digits >= 2:
+    if has_upper: # score = 1
         score += 1
 
-    if count_punctuation >= 3:
+    if count_digits >= 4: # score = 1
+        score += 1
+
+    if count_punctuation >= 5: # score = 1
         score += 1
 
     if score <= 2:
@@ -170,14 +188,16 @@ def evaluate_password_force(password: str):
     if score <= 5:
         return "Fort"
 
-    if score <= 6:
+    if score <= 7:
         return "Tres fort"
 
 
 def generate_multiple_passwords(count: int, length: int, chars: str, required_chars: List[str]) -> List[str]:
+
     return [
-        genarate_unique_password(length, chars, required_chars) for _ in range(count)
+        generate_unique_password(length, chars, required_chars) for _ in range(count)
     ]
+
 def display_passwords(passwords: List[str]) -> None:
     
     for index, pwd in enumerate(passwords, start=1) :
@@ -187,10 +207,12 @@ def display_passwords(passwords: List[str]) -> None:
 def choose_password(passwords:List[str])  -> str:
     while True :
         choice = number_input(f"Choose betwen 1 and {len(passwords)}  >>> ")
-        if 1 <= choice <= len(passwords) :
+        if choice <= len(passwords) :
             return passwords[choice - 1]
         print("Invalid Choice")
     
+
+
         
 def copy_to_clipboard(password: str) -> None :
     choice = binary_input("Copy to clipboard ? (0/1) >>> ")
@@ -201,12 +223,16 @@ def copy_to_clipboard(password: str) -> None :
     else :
        print("Password did not copy") 
     
+    
 
 # <>
 def main() -> None:
     length = number_input("Set length >>> ")
 
     chars, required_chars = build_password_chars()
+    if not chars  :
+        print("chars vide")
+        return
 
     count = number_input("How many password generate ? >>> ")
     x = generate_multiple_passwords(
@@ -224,3 +250,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
