@@ -1,3 +1,3 @@
-a = "gwaldstone"
+a = {}
 
 print(a.capitalize())

@@ -27,20 +27,24 @@ L'utilisateur peut
 
 import pathlib as p
 import json
-import sys
 from typing import List, Dict
 
 
-def Create_File(filename: str) -> None:
+def Dump_in_File(filename: str, init_data: dict = None) -> None:
+    if init_data is None:
+        init_data = {}
+
     with open(filename, "w") as file:
-        file.write("{}")
+        json.dump(init_data, file, indent=3)
 
 
-def Read_File(filename: str) -> str:
+def Load_from_File(filename: str) -> dict:
     try:
         with open(filename, "r") as file:
-            return file.read()
-    except FileNotFoundError:
+            return json.load(file)
+    except json.JSONDecodeError as e:
+        print("INVALID JSON FILE")
+    except IOError:
         print("FILE NOT FOUND")
 
 
@@ -50,8 +54,8 @@ def Handle_Json_File() -> dict:
         path = p.Path(filename)
 
         if not path.exists():
-            Create_File(filename=filename)
-        data = Read_File(filename=filename)
+            Dump_in_File(filename)
+        data = Load_from_File(filename)
         return data
     except IOError:
         print("ERROR LORS DE WRITE/READ DE FILE")
@@ -79,36 +83,56 @@ def String_Input(text: str) -> str:
         return value
 
 
-def Add_Dict_Keys(data: Dict[str, List[str]], category: str) -> None:
-    keys = list(data.keys())
-    if len(keys) == 0:
-        keys.append(category)
-    if keys.count(category) > 0:
-        print("CATEGORY ALREADY EXIST")
-    return keys
+def Add_Category(data: dict, filename: str = "data.json") -> None:
 
+    # data = Handle_Json_File()
 
-def Add_Category(data: Dict[str, List[str]]) -> None:
-    print("1",data)
     while True:
         choice = Binary_Input("Add caterory ? (0 = NO / 1 = Yes) >>> ")
 
         if choice:
-            category = String_Input("Set category name >>> ")
-            if category in data:
-                print("CATEGORY ALREADY EXIST - RETRY")
-                continue
-            data[category] = []
-            json.dumps(data)
-            
-            break
+            while True:
+                category = String_Input("Set category name >>> ")
+                if category in data:
+                    print("CATEGORY ALREADY EXIST - RETRY")
+                    continue
+                break
+        data[category] = []
 
-    print(data)
+        print(f"Category [{category}] added...")
+
+        Dump_in_File(filename, data)
+        categories = sorted(list(data.keys()))
+
+        return categories
+
+
+def Display_Items(items:  List[str]) -> None:
+    for index, item in enumerate(items, start=1):
+        print(f"{index} - {item}")
+
+
+def Delete_Item(item:  str) -> None:
+    pass
+
+
+def Edit_Category(item:  str) -> None:
+    pass
+
+def welcome() -> None :
+    print("#"*40)
+    print(f"{"COURSES PLANNER":>25}")
+    print("#"*40)
 
 def main() -> None:
-    data = Handle_Json_File()
-    print(data, type(dict(data)))
-    # Add_Category(data)
+    try:
+        welcome()
+        data = Handle_Json_File()
+        categories = Add_Category(data)
+        Display_Items(categories)
+
+    except KeyboardInterrupt:
+        print("\nKeyboardInterrupt")
 
 
 if __name__ == "__main__":
