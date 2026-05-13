@@ -71,7 +71,17 @@ def Binary_Input(text: str) -> bool:
                 return bool(value)
             return bool(value)
     except ValueError:
-        print("ENTER VALID INPUT")
+        print("ENTER VALID INPUT (0/1)")
+
+
+def Number_input(text: str, min: int = 1) -> int:
+    try:
+        value = int(input(text))
+        if not value >= min:
+            print("ENTER VALUE GREATHER THAN ZERO")
+        return value
+    except ValueError:
+        print("ENTER VALID NUMBER INPUT")
 
 
 def String_Input(text: str) -> str:
@@ -119,17 +129,62 @@ def Delete_Item(item:  str) -> None:
 def Edit_Category(item:  str) -> None:
     pass
 
-def welcome() -> None :
+
+def Welcome() -> None:
     print("#"*40)
     print(f"{"COURSES PLANNER":>25}")
     print("#"*40)
 
+
+def Start_menu(menu: List[str]):
+    for i, v in enumerate(menu, start=1):
+        print(f"{i} - {v}")
+    while True:
+        value = Number_input(
+            f"Choose your action {"/".join(str(i) for i in range(1, len(menu) + 1))} >>> ")
+        if not 1 <= value <= 3:
+            print("INVALID INPUT - TRY (1/2/3)")
+            continue
+        return value
+
+
+def Handle_categroies(data: dict):
+
+    Display_Items(Add_Category(data))
+
+
+def Handle_menu(menu: List[str], option: int, data: dict):
+
+    if option == 1:
+        print(f"\n{option} - {menu[option - 1]}")
+        if len(list(data.keys())) == 0:
+            print("Nothing to display\n")
+            menu.pop(option - 1)
+            # option = Start_menu(menu)
+        else:
+            categories = list(data.keys())
+            Display_Items(categories)
+
+    if option == 2:
+        print(f"- {menu[option - 1]}\n")
+        Handle_categroies(data)
+
+    if option == 3:
+        print("\nEXIT PROGRAM - GOODBYE")
+        exit(0)
+
+
 def main() -> None:
+    menu = ["Display shopping", "Add new catergory", "Exit program"]
+    data = Handle_Json_File()
     try:
-        welcome()
-        data = Handle_Json_File()
-        categories = Add_Category(data)
-        Display_Items(categories)
+        Welcome()
+        option = Start_menu(menu)
+        Handle_menu(menu, option, data)
+        # option = Start_menu(menu)
+
+        # categories = Add_Category(data)
+        # Display_Items(categories)
 
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt")
