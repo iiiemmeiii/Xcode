@@ -23,111 +23,263 @@ L'utilisateur peut
 - Explore `json.load()` et `json.dump()`
 - Comment gérer l'absence du fichier au premier lancement ?
  <>
+
+ Le programme doit memoriser l'etat et se souvenir lors de lexec
 """
 
 import pathlib as p
-import json
+from json import JSONDecodeError, dump, load
 from typing import List, Dict
+import pysnooper
+
+############################################################################
+
+# Global variable
+filename: str = "data.json"
+menu: List[str] = ["Display shopping", "Add new catergory", "Add article",
+                   "Delete a category", "Delete all categories", "Check Article", "Delete article", "Exit program"]
+article_key: tuple[str] = ("name", "check")
+# Global Type
+type data_type = Dict[str, List[Dict[str, bool]]]
+
+############################################################################
+# File handler function
 
 
-def Dump_in_File(filename: str, init_data: dict = None) -> None:
-    if init_data is None:
-        init_data = {}
+def dump_into_file(filename: str, data: data_type = None) -> None:
+    if data is None:
+        data = {}
 
     with open(filename, "w") as file:
-        json.dump(init_data, file, indent=3)
+        dump(data, file, indent=3)
 
 
-def Load_from_File(filename: str) -> dict:
+def load_from_file(filename: str) -> data_type:
     try:
         with open(filename, "r") as file:
-            return json.load(file)
-    except json.JSONDecodeError as e:
+            return load(file)
+    except JSONDecodeError as e:
         print("INVALID JSON FILE")
     except IOError:
         print("FILE NOT FOUND")
 
+# this function check if file exist write it if not
 
-def Handle_Json_File() -> dict:
-    filename: str = "data.json"
+
+def handle_file(filename: str) -> None:
     try:
         path = p.Path(filename)
 
         if not path.exists():
-            Dump_in_File(filename)
-        data = Load_from_File(filename)
-        return data
+            dump_into_file(filename)
     except IOError:
-        print("ERROR LORS DE WRITE/READ DE FILE")
+        print("\nFile IOError")
+
+############################################################################
 
 
-def Binary_Input(text: str) -> bool:
+def bool_input(text: str, nim: int = 0, xam: int = 1) -> bool:
     try:
         while True:
-            value = int(input(text).strip())
-            if not 0 <= value <= 1:
-                print("INPUT INVALID (0/1)")
+            value = int(input(text))
+            if not nim <= value <= xam:
+                print(f"\nError: [{value}] wrong answer.. expected -> (0/1)")
+                continue
             if value == 0:
                 return bool(value)
             return bool(value)
     except ValueError:
-        print("ENTER VALID INPUT (0/1)")
+        print("\nValueError: integer number expected -> (0/1)")
 
 
-def Number_input(text: str, min: int = 1) -> int:
+def number_input(text: str, nim: int = 1) -> int:
     try:
-        value = int(input(text))
-        if not value >= min:
-            print("ENTER VALUE GREATHER THAN ZERO")
-        return value
+        while True:
+            value = int(input(text))
+            if not value >= nim:
+                print(f"\nError: [{value}] must be greather than 0)")
+                continue
+            return value
     except ValueError:
-        print("ENTER VALID NUMBER INPUT")
+        print("\nValueError: integer number only")
 
 
-def String_Input(text: str) -> str:
+def string_input(text: str) -> str:
     while True:
         value = input(text).strip().capitalize()
-        if value == "":
-            print("EMPTY INPUT: RETRY")
+        if not value:
+            print("\nNot empty string: eg[fruit, drink...]")
             continue
         return value
+###################################################################################
+# UTILS
 
 
-def Add_Category(data: dict, filename: str = "data.json") -> None:
+def target_item(index: int, items: list[str], nim: int = 0, decr: int = 1) -> str:
+    index -= decr
+    if not nim <= index < len(items):
+        print("\nCategory id is invalid")
+        return
+    return items[index]
 
-    # data = Handle_Json_File()
 
+def category_list(data: data_type) -> list[str]:
+    return [cat for cat in data.keys() if cat]
+
+##################################################################################
+
+
+def add_category(data: data_type) -> data_type:
     while True:
-        choice = Binary_Input("Add caterory ? (0 = NO / 1 = Yes) >>> ")
+        category = string_input("\nSet category name >>> ")
+        if category in data:
+            print("\nCategory already exist - retry")
+            continue
 
-        if choice:
-            while True:
-                category = String_Input("Set category name >>> ")
-                if category in data:
-                    print("CATEGORY ALREADY EXIST - RETRY")
-                    continue
-                break
         data[category] = []
-
-        print(f"Category [{category}] added...")
-
-        Dump_in_File(filename, data)
-        categories = sorted(list(data.keys()))
-
-        return categories
+        print(f"\nCategory [{category}] added...")
+        return data
 
 
-def Display_Items(items:  List[str]) -> None:
-    for index, item in enumerate(items, start=1):
-        print(f"{index} - {item}")
+def delete_single_category(data: data_type) -> data_type:
+    categories = category_list(data)
+    if not categories:
+        print("There is any category set...")
+        return
+    while True:
+        try:
+            index: int = number_input("\nEnter category id >>> ")
+            category: str = target_item(index, categories)
+            if not category:
+                continue
+            print(f"\nCategory [{category}] delete successfully ...\n")
+            data.pop(category)
+        except TypeError:
+            print(f"\nError : Try to enter valid categorie id -> (int) \n")
+        
 
 
-def Delete_Item(item:  str) -> None:
-    pass
+def delete_all_category(data: dict) -> dict:
+    if not data:
+        print("\nCategories base is empty")
+        return
+    data.clear()
+    print("\nAll Categories delete successfully ...\n")
+    return data
 
 
-def Edit_Category(item:  str) -> None:
-    pass
+"""
+Article function
+"""
+
+
+def add_article(data: data_type) -> data_type:
+    categories: List[str] = category_list(data)
+    if not categories:
+        print("There is any category set...")
+        return
+    while True:
+        try:
+            index = number_input("\nSelect Caterory: Id >>> ")
+            category = target_item(index, categories)
+            if not category:
+                continue
+            print(f"\nAdd article into category [{category}]")
+            article_name = string_input("\nSet article name >>> ")
+            if not article_name:
+                continue
+            article_obj = {
+                article_key[0]: article_name,
+                article_key[1]: False
+            }
+            data[category].append(article_obj)
+        except TypeError:
+            print("Add aritcle typeError")
+        except IndexError:
+            print("\nArticle Add : Category id is invalid")
+        else:
+            return data
+
+# @pysnooper.snoop()
+
+
+def delete_article(data: data_type):
+    categories = category_list(data)
+    if not categories:
+        print("There is any category set...")
+        return
+    while True:
+        try:
+            index: int = number_input("\nEnter category id >>> ")
+            # Target category
+            category = target_item(index, categories)
+
+            if not category:
+                continue
+            print(category)
+            # Target article in category
+            index2 = number_input("\nEnter article id >>> ")
+            if not index2:
+                continue
+            article = target_item(index2, data[category])
+            if not article:
+                continue
+            data[category].remove(article)
+        except TypeError:
+            print("TypeError")
+        except IndexError:
+            print("\nArticle Add : Category id is invalid")
+        else:
+            return data
+
+
+@pysnooper.snoop()
+def cocher_article(data: data_type):
+    categories = category_list(data)
+    if not data:
+        print("\nCategories base is empty")
+        return
+    while True:
+        try:
+            index = number_input("\nEnter category id >>> ")
+            if not index:
+                continue
+            category = target_item(index, categories)
+
+            index2 = number_input("\nEnter article id >>> ")
+            if not index2:
+                continue
+            article = target_item(index2, data[category])
+            article[article_key[1]] = not article[article_key[1]]
+        except TypeError:
+            print("TypeError")
+        else :
+            return data
+
+
+###################################################################################
+
+
+def display_menu(menu) -> None:
+    print("")
+    for index, item in enumerate(menu, start=1):
+        print(f"[{index}] - {item}")
+
+
+def display_article(data: data_type) -> None:
+    print("")
+
+    categories: list[tuple[int, str]] = [(x, c)
+                                         for x, c in enumerate(data, start=1)]
+    for cat in categories:
+        index = cat[0]
+        category = cat[1]
+        print(f"[{index}] - {category}")
+        articles: list[tuple[int, dict[str, str | bool]]] = [
+            (y, a) for y, a in enumerate(data[category], start=1)]
+        for article in articles:
+            check: str = " " if not article[1]["check"] else "X"
+            print(f"\t {article[0]} | [{check}] - {article[1]["name"]}")
 
 
 def Welcome() -> None:
@@ -136,59 +288,66 @@ def Welcome() -> None:
     print("#"*40)
 
 
-def Start_menu(menu: List[str]):
-    for i, v in enumerate(menu, start=1):
-        print(f"{i} - {v}")
-    while True:
-        value = Number_input(
-            f"Choose your action {"/".join(str(i) for i in range(1, len(menu) + 1))} >>> ")
-        if not 1 <= value <= 3:
-            print("INVALID INPUT - TRY (1/2/3)")
-            continue
-        return value
-
-
-def Handle_categroies(data: dict):
-
-    Display_Items(Add_Category(data))
-
-
-def Handle_menu(menu: List[str], option: int, data: dict):
-
-    if option == 1:
-        print(f"\n{option} - {menu[option - 1]}")
-        if len(list(data.keys())) == 0:
-            print("Nothing to display\n")
-            menu.pop(option - 1)
-            # option = Start_menu(menu)
-        else:
-            categories = list(data.keys())
-            Display_Items(categories)
-
-    if option == 2:
-        print(f"- {menu[option - 1]}\n")
-        Handle_categroies(data)
-
-    if option == 3:
-        print("\nEXIT PROGRAM - GOODBYE")
-        exit(0)
-
-
 def main() -> None:
-    menu = ["Display shopping", "Add new catergory", "Exit program"]
-    data = Handle_Json_File()
-    try:
-        Welcome()
-        option = Start_menu(menu)
-        Handle_menu(menu, option, data)
-        # option = Start_menu(menu)
 
-        # categories = Add_Category(data)
-        # Display_Items(categories)
+    handle_file(filename)
 
-    except KeyboardInterrupt:
-        print("\nKeyboardInterrupt")
+    data = load_from_file(filename)
+
+    Welcome()
+
+    while True:
+        display_menu(menu)
+        data = load_from_file(filename)
+        enumeration = "/".join(str(i) for i in range(1, len(menu) + 1))
+        option = number_input(f"Choose option ({enumeration}) >>> ")
+
+        if option == 1:
+            if not data:
+                print("\nNothing to show > Set catergory (2)")
+                continue
+            else:
+
+                display_article(data)
+
+        elif option == 2:
+            data = add_category(data)
+            # creer la memoire du programme
+            dump_into_file(filename, data)
+
+        elif option == 3:
+            display_article(data)
+            data = add_article(data)
+            dump_into_file(filename, data)
+
+        elif option == 4:
+            data = delete_single_category(data)
+
+            dump_into_file(filename, data)
+
+        elif option == 5:
+            delete_all_category(data)
+            dump_into_file(filename, data)
+        elif option == 6:
+            data = cocher_article(data)
+            dump_into_file(filename, data)
+        elif option == 7:
+            data = delete_article(data)
+            # data = delete_article(data)
+            dump_into_file(filename, data)
+
+        elif option == 8:
+            confirmation = bool_input("\nAre you show to exist ? (0/1) >>> ")
+            if confirmation:
+                print("\nGoodbye: see you next ...\n")
+                exit(0)
+            else:
+                continue
 
 
 if __name__ == "__main__":
-    main()
+    try:
+
+        main()
+    except KeyboardInterrupt:
+        print("\n\nUser existing program by ctrl-c")
