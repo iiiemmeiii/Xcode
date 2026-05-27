@@ -37,7 +37,8 @@ import pysnooper
 # Global variable
 filename: str = "data.json"
 menu: List[str] = ["Display shopping", "Add new catergory", "Add article",
-                   "Delete a category", "Delete all categories", "Check Article", "Delete article", "Exit program"]
+                   "Delete a category", "Delete all categories", "Check Article",
+                   "Delete article", "Save shopping", "Exit program"]
 article_key: tuple[str] = ("name", "check")
 # Global Type
 type data_type = Dict[str, List[Dict[str, bool]]]
@@ -58,22 +59,18 @@ def load_from_file(filename: str) -> data_type:
     try:
         with open(filename, "r") as file:
             return load(file)
-    except JSONDecodeError as e:
-        print("INVALID JSON FILE")
-    except IOError:
-        print("FILE NOT FOUND")
-
+    except (JSONDecodeError, IOError) :
+        print("\n[!] Error loading file. Returning empty database.")
+        return {}
 # this function check if file exist write it if not
 
 
 def handle_file(filename: str) -> None:
-    try:
-        path = p.Path(filename)
+    path = p.Path(filename)
+    if not path.exists():
+        dump_into_file(filename)
 
-        if not path.exists():
-            dump_into_file(filename)
-    except IOError:
-        print("\nFile IOError")
+    
 
 ############################################################################
 
@@ -107,24 +104,24 @@ def number_input(text: str, nim: int = 1) -> int:
 def string_input(text: str) -> str:
     while True:
         value = input(text).strip().capitalize()
-        if not value:
-            print("\nNot empty string: eg[fruit, drink...]")
-            continue
-        return value
+        if  value:
+            return value
+        print("\nError: String cannot be empty.")
+        
 ###################################################################################
 # UTILS
 
 
-def target_item(index: int, items: list[str], nim: int = 0, decr: int = 1) -> str:
-    index -= decr
-    if not nim <= index < len(items):
+def target_item(index: int, items: list[str]) -> str:
+    current_index = index - 1
+    if not 0 <= current_index < len(items):
         print("\nCategory id is invalid")
-        return
-    return items[index]
+        return None
+    return items[current_index]
 
 
 def category_list(data: data_type) -> list[str]:
-    return [cat for cat in data.keys() if cat]
+    return list(data.keys())
 
 ##################################################################################
 
@@ -145,7 +142,7 @@ def delete_single_category(data: data_type) -> data_type:
     categories = category_list(data)
     if not categories:
         print("There is any category set...")
-        return
+        return data
     while True:
         try:
             index: int = number_input("\nEnter category id >>> ")
@@ -156,7 +153,8 @@ def delete_single_category(data: data_type) -> data_type:
             data.pop(category)
         except TypeError:
             print(f"\nError : Try to enter valid categorie id -> (int) \n")
-        
+        else:
+            return data
 
 
 def delete_all_category(data: dict) -> dict:
@@ -203,7 +201,7 @@ def add_article(data: data_type) -> data_type:
 # @pysnooper.snoop()
 
 
-def delete_article(data: data_type):
+def delete_article(data: data_type) ->  data_type:
     categories = category_list(data)
     if not categories:
         print("There is any category set...")
@@ -216,7 +214,6 @@ def delete_article(data: data_type):
 
             if not category:
                 continue
-            print(category)
             # Target article in category
             index2 = number_input("\nEnter article id >>> ")
             if not index2:
@@ -225,6 +222,8 @@ def delete_article(data: data_type):
             if not article:
                 continue
             data[category].remove(article)
+            print(f"\nCategory [{category}] deleted successfully...")
+
         except TypeError:
             print("TypeError")
         except IndexError:
@@ -233,10 +232,9 @@ def delete_article(data: data_type):
             return data
 
 
-@pysnooper.snoop()
 def cocher_article(data: data_type):
     categories = category_list(data)
-    if not data:
+    if not categories:
         print("\nCategories base is empty")
         return
     while True:
@@ -250,12 +248,33 @@ def cocher_article(data: data_type):
             if not index2:
                 continue
             article = target_item(index2, data[category])
+            # if not article:
+            #     print(f"\n Category [{category}] is empty... Set article")
+            #     continue
+            name = article[article_key[0]]
             article[article_key[1]] = not article[article_key[1]]
+            text: str = f"\nArticle [{name}] checked..." if article[article_key[1]
+                                                                    ] else f"\nArticle [{name}] unchecked..."
+            print(text)
         except TypeError:
-            print("TypeError")
-        else :
+            print("\nCategory [{category}] is empty or enter valid value")
+        else:
             return data
 
+
+###################################################################################
+def save(data: data_type, filename: str = "save.txt") -> None:
+    with open(filename, "w", encoding="utf-8") as file:
+        file.write("=== SHOPPING LIST EXPORT ===\n\n")
+        for category, articles in data.items():
+            file.write(f"~~ {category.upper()}\n")
+            if not articles:
+                file.write("  (No articles)\n")
+            for art in articles:
+                box = "[X]" if art["check"] else "[ ]"
+                file.write(f"\t{box} {art['name']}\n")
+            file.write("-" * 30 + "\n")
+    print(f"\nSuccessfully exported to {filename}!")
 
 ###################################################################################
 
@@ -282,23 +301,19 @@ def display_article(data: data_type) -> None:
             print(f"\t {article[0]} | [{check}] - {article[1]["name"]}")
 
 
-def Welcome() -> None:
+def welcome() -> None:
     print("#"*40)
-    print(f"{"COURSES PLANNER":>25}")
+    print(f"{"SHOPPING PLANNER":^40}")
     print("#"*40)
 
 
 def main() -> None:
 
     handle_file(filename)
-
     data = load_from_file(filename)
-
-    Welcome()
-
+    welcome()
     while True:
         display_menu(menu)
-        data = load_from_file(filename)
         enumeration = "/".join(str(i) for i in range(1, len(menu) + 1))
         option = number_input(f"Choose option ({enumeration}) >>> ")
 
@@ -326,23 +341,29 @@ def main() -> None:
             dump_into_file(filename, data)
 
         elif option == 5:
-            delete_all_category(data)
+            data = delete_all_category(data)
             dump_into_file(filename, data)
         elif option == 6:
+            display_article(data)
             data = cocher_article(data)
             dump_into_file(filename, data)
         elif option == 7:
+            display_article(data)
             data = delete_article(data)
-            # data = delete_article(data)
             dump_into_file(filename, data)
-
+        
         elif option == 8:
+            save(data)
+        elif option == 9:
             confirmation = bool_input("\nAre you show to exist ? (0/1) >>> ")
             if confirmation:
                 print("\nGoodbye: see you next ...\n")
                 exit(0)
             else:
                 continue
+
+
+
 
 
 if __name__ == "__main__":
