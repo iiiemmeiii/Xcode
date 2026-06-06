@@ -1,0 +1,19 @@
+=== SHOPPING LIST EXPORT ===
+
+~~ LIQUIDE
+	[ ] Fanta
+	[X] Savon liquide
+	[ ] Eau
+------------------------------
+~~ LEGUMES
+	[ ] Epinards
+------------------------------
+~~ CONDIMENT
+	[X] Piment
+------------------------------
+~~ JUIS
+  (No articles)
+------------------------------
+~~ AZER
+  (No articles)
+------------------------------

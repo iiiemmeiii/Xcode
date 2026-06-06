@@ -1,0 +1,30 @@
+{
+   "Liquide": [
+      {
+         "name": "Fanta",
+         "check": false
+      },
+      {
+         "name": "Savon liquide",
+         "check": true
+      },
+      {
+         "name": "Eau",
+         "check": false
+      }
+   ],
+   "Legumes": [
+      {
+         "name": "Epinards",
+         "check": false
+      }
+   ],
+   "Condiment": [
+      {
+         "name": "Piment",
+         "check": true
+      }
+   ],
+   "Juis": [],
+   "Azer": []
+}
