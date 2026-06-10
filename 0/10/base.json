@@ -1,0 +1,296 @@
+{
+  "Biologie": {
+    "facile": [
+      {
+        "question": "Quel organe pompe le sang ?",
+        "reponses": ["Cœur", "Poumon", "Foie", "Cerveau"],
+        "correct": "Cœur",
+        "temps": 15
+      },
+      {
+        "question": "De quelle couleur est la chlorophylle ?",
+        "reponses": ["Vert", "Rouge", "Bleu", "Jaune"],
+        "correct": "Vert",
+        "temps": 15
+      },
+      {
+        "question": "Combien d'os a un adulte (environ) ?",
+        "reponses": ["206", "106", "306", "406"],
+        "correct": "206",
+        "temps": 15
+      },
+      {
+        "question": "Quel gaz respirons-nous en priorité ?",
+        "reponses": ["Oxygène", "Azote", "Hydrogène", "Argon"],
+        "correct": "Oxygène",
+        "temps": 15
+      },
+      {
+        "question": "Quel est le plus grand organe humain ?",
+        "reponses": ["Peau", "Foie", "Estomac", "Rein"],
+        "correct": "Peau",
+        "temps": 15
+      }
+    ],
+    "moyen": [
+      {
+        "question": "Où est stocké l'ADN eucaryote ?",
+        "reponses": ["Noyau", "Vacuoles", "Paroi", "Lysosome"],
+        "correct": "Noyau",
+        "temps": 10
+      },
+      {
+        "question": "Quel groupe sanguin est donneur universel ?",
+        "reponses": ["O-", "O+", "AB+", "A-"],
+        "correct": "O-",
+        "temps": 10
+      },
+      {
+        "question": "Comment nomme-t-on la division cellulaire ?",
+        "reponses": ["Mitose", "Méiose", "Lyse", "Fusion"],
+        "correct": "Mitose",
+        "temps": 10
+      },
+      {
+        "question": "De quoi sont composées les protéines ?",
+        "reponses": ["Acides aminés", "Lipides", "Glucides", "Sels"],
+        "correct": "Acides aminés",
+        "temps": 10
+      },
+      {
+        "question": "Que transportent les globules rouges ?",
+        "reponses": ["Oxygène", "Déchets", "Sucre", "Graisses"],
+        "correct": "Oxygène",
+        "temps": 10
+      }
+    ],
+    "difficile": [
+      {
+        "question": "Quel organite produit l'ATP ?",
+        "reponses": ["Mitochondrie", "Golgi", "Ribosome", "Noyau"],
+        "correct": "Mitochondrie",
+        "temps": 5
+      },
+      {
+        "question": "Quelle base remplace la thymine dans l'ARN ?",
+        "reponses": ["Uracile", "Adénine", "Cytosine", "Guanine"],
+        "correct": "Uracile",
+        "temps": 5
+      },
+      {
+        "question": "Quelle hormone régule le sucre ?",
+        "reponses": ["Insuline", "Cortisol", "Glucagon", "Gastrine"],
+        "correct": "Insuline",
+        "temps": 5
+      },
+      {
+        "question": "Comment appelle-t-on la mort cellulaire ?",
+        "reponses": ["Apoptose", "Nécrose", "Lyse", "Atrophie"],
+        "correct": "Apoptose",
+        "temps": 5
+      },
+      {
+        "question": "Quel neurotransmetteur gère le plaisir ?",
+        "reponses": ["Dopamine", "GABA", "Ocytocine", "Cortisol"],
+        "correct": "Dopamine",
+        "temps": 5
+      }
+    ]
+  },
+  "Informatique": {
+    "facile": [
+      {
+        "question": "Que signifie le 'M' de HTML ?",
+        "reponses": ["Markup", "Modern", "Management", "Machine"],
+        "correct": "Markup",
+        "temps": 15
+      },
+      {
+        "question": "Quel est le 'cerveau' du PC (acronyme) ?",
+        "reponses": ["CPU", "RAM", "GPU", "SSD"],
+        "correct": "CPU",
+        "temps": 15
+      },
+      {
+        "question": "Quelle est l'extension d'un script Python ?",
+        "reponses": [".py", ".python", ".pyt", ".exe"],
+        "correct": ".py",
+        "temps": 15
+      },
+      {
+        "question": "Comment appelle-t-on une erreur de code ?",
+        "reponses": ["Bug", "Virus", "Faille", "Crash"],
+        "correct": "Bug",
+        "temps": 15
+      },
+      {
+        "question": "Quel outil sert à cliquer sur PC ?",
+        "reponses": ["Souris", "Clavier", "Écran", "Micro"],
+        "correct": "Souris",
+        "temps": 15
+      }
+    ],
+    "moyen": [
+      {
+        "question": "Quel principe régit une Pile ?",
+        "reponses": ["LIFO", "FIFO", "LRU", "FILO"],
+        "correct": "LIFO",
+        "temps": 10
+      },
+      {
+        "question": "Quelle méthode HTTP crée une ressource ?",
+        "reponses": ["POST", "GET", "DELETE", "PATCH"],
+        "correct": "POST",
+        "temps": 10
+      },
+      {
+        "question": "Quel port utilise le protocole HTTPS ?",
+        "reponses": ["443", "80", "22", "8080"],
+        "correct": "443",
+        "temps": 10
+      },
+      {
+        "question": "Quelle fonction Python donne la taille d'une liste ?",
+        "reponses": ["len()", "length()", "size()", "count()"],
+        "correct": "len()",
+        "temps": 10
+      },
+      {
+        "question": "Quelle est la base de l'hexadécimal ?",
+        "reponses": ["16", "2", "8", "10"],
+        "correct": "16",
+        "temps": 10
+      }
+    ],
+    "difficile": [
+      {
+        "question": "Quel tri a une complexité moyenne en O(n log n) ?",
+        "reponses": ["Quicksort", "Bubblesort", "Tri Sélection", "Tri Fusion"],
+        "correct": "Quicksort",
+        "temps": 5
+      },
+      {
+        "question": "Quelle clause SQL filtre un GROUP BY ?",
+        "reponses": ["HAVING", "WHERE", "JOIN", "ON"],
+        "correct": "HAVING",
+        "temps": 5
+      },
+      {
+        "question": "Quel protocole Couche 4 est fiable (acronyme) ?",
+        "reponses": ["TCP", "UDP", "IP", "DNS"],
+        "correct": "TCP",
+        "temps": 5
+      },
+      {
+        "question": "Quel concept n'a aucun effet secondaire ?",
+        "reponses": ["Fonction pure", "Boucle for", "Classe", "Pointeur"],
+        "correct": "Fonction pure",
+        "temps": 5
+      },
+      {
+        "question": "Chiffrement utilisant une clé publique/privée :",
+        "reponses": ["Asymétrique", "Symétrique", "Hachage", "AES"],
+        "correct": "Asymétrique",
+        "temps": 5
+      }
+    ]
+  },
+  "Histoire": {
+    "facile": [
+      {
+        "question": "Quel empereur a été couronné en 1804 ?",
+        "reponses": ["Napoléon", "Louis XIV", "Charlemagne", "Henri IV"],
+        "correct": "Napoléon",
+        "temps": 15
+      },
+      {
+        "question": "En quelle année finit la Grande Guerre (14-18) ?",
+        "reponses": ["1918", "1914", "1939", "1945"],
+        "correct": "1918",
+        "temps": 15
+      },
+      {
+        "question": "Quelle reine d'Égypte a séduit César ?",
+        "reponses": ["Cléopâtre", "Néfertiti", "Isis", "Hatchepsout"],
+        "correct": "Cléopâtre",
+        "temps": 15
+      },
+      {
+        "question": "Qu'a-t-on pris le 14 juillet 1789 ?",
+        "reponses": ["La Bastille", "Le Louvre", "Versailles", "L'Élysée"],
+        "correct": "La Bastille",
+        "temps": 15
+      },
+      {
+        "question": "Sur quel continent vivaient les Incas ?",
+        "reponses": ["Amérique Sud", "Afrique", "Asie", "Europe"],
+        "correct": "Amérique Sud",
+        "temps": 15
+      }
+    ],
+    "moyen": [
+      {
+        "question": "Quel roi était le 'Roi-Soleil' ?",
+        "reponses": ["Louis XIV", "Louis XVI", "François Ier", "Henri IV"],
+        "correct": "Louis XIV",
+        "temps": 10
+      },
+      {
+        "question": "En quelle année Colomb découvre l'Amérique ?",
+        "reponses": ["1492", "1515", "1350", "1589"],
+        "correct": "1492",
+        "temps": 10
+      },
+      {
+        "question": "Président USA pendant la Guerre 39-45 (nom) ?",
+        "reponses": ["Roosevelt", "Truman", "Kennedy", "Lincoln"],
+        "correct": "Roosevelt",
+        "temps": 10
+      },
+      {
+        "question": "Quel peuple a bâti le Machu Picchu ?",
+        "reponses": ["Incas", "Mayas", "Aztèques", "Romains"],
+        "correct": "Incas",
+        "temps": 10
+      },
+      {
+        "question": "Quelle muraille protégeait le nord de la Chine ?",
+        "reponses": ["GrandeMuraille", "Hadrien", "Berlin", "Chine"],
+        "correct": "GrandeMuraille",
+        "temps": 10
+      }
+    ],
+    "difficile": [
+      {
+        "question": "Année de la chute de l'Empire romain d'Occident ?",
+        "reponses": ["476", "395", "1453", "800"],
+        "correct": "476",
+        "temps": 5
+      },
+      {
+        "question": "Quel traité met fin à la Première Guerre mondiale ?",
+        "reponses": ["Versailles", "Vienne", "Utrecht", "Tordesillas"],
+        "correct": "Versailles",
+        "temps": 5
+      },
+      {
+        "question": "Premier ministre UK en 39-45 (nom) ?",
+        "reponses": ["Churchill", "Attlee", "Thatcher", "Major"],
+        "correct": "Churchill",
+        "temps": 5
+      },
+      {
+        "question": "Dernière dynastie des tsars russes ?",
+        "reponses": ["Romanov", "Habsbourg", "Bourbon", "Tudor"],
+        "correct": "Romanov",
+        "temps": 5
+      },
+      {
+        "question": "Quel empereur a légalisé le christianisme ?",
+        "reponses": ["Constantin", "Néron", "Auguste", "César"],
+        "correct": "Constantin",
+        "temps": 5
+      }
+    ]
+  }
+}
