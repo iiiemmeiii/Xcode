@@ -53,11 +53,19 @@ Json format
 # IMPORT
 import pathlib as pl
 import json
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple, TypeAlias
 from pyfiglet import figlet_format
 from random import sample, shuffle
 from tabulate import tabulate
 from copy import deepcopy
+
+# réutilisables et découplées, précondition, générique
+##########################################################################################################
+# TYPE
+Package: TypeAlias = Dict[str, Any]
+Level: TypeAlias = List[Package]
+Topics: TypeAlias = Dict[str, Level]
+Quiz: TypeAlias = Dict[str, Topics]
 ##########################################################################################################
 # GLOBALS VARIABLE
 QUIZ_FILE = "base.json"
@@ -68,14 +76,14 @@ font = "mono9"
 # FILES MANAGMENT
 
 
-def load_data(filename: str, mode: str = "r", encoding: str = "utf-8") -> Dict[str, Any]:
+def load_data(filename: str, mode: str = "r", encoding: str = "utf-8") -> Quiz:
     try:
         file_path = pl.Path(filename)
         if not file_path.exists():
             print("\nFile not found...")
             return {}
         with open(filename, mode, encoding=encoding) as file:
-            data = json.load(file)
+            data: Quiz = json.load(file)
         return data
     except json.JSONDecodeError:
         print("\nLoad file Error...")
@@ -89,114 +97,87 @@ def confirmation_input(text: str) -> bool:
     while True:
         try:
             value: int = int(input(text))
-            if 0 <= value <= 1:
-                print("\nValue must between (0/1)")
-                continue
-            if value == 0:
-                return False
-            return True
+            if value in (0, 1):
+                return bool(value)
+            print("\nValue must between (0/1)")
         except ValueError:
             print("\nInvalid entry -> Excepted (0/1)")
 
 
-def number_input(text: str, minimum: int = 1) -> int:
+def number_input(text: str, length: int) -> int:
     while True:
         try:
             value = int(input(text))
-            if not value >= 1:
-                print("\nInvalid entry -> Excepted [Value must be > 0])")
-                continue
-            return value
+            if 1 <= value <= length:
+                return value
+            print("\nInvalid entry -> Excepted [Value must be > 0])")
         except ValueError:
             print("\nInvalid entry -> Excepted integer value)")
-
-
-def answer_input(text: str) -> str:
-    return input(text).strip().lower()
 
 ##########################################################################################################
 # FEATURES FONCTIONS
 
 
-def play_game(data: Dict[str, Any], topic: str, difficulty: str) -> Any:
+def play_game(data: Quiz, topic: str, difficulty: str) -> Tuple[int, List[Dict[str, str]]]:
     score = 0
-    copy_concern = deepcopy(data[topic][difficulty])
-    packs = sample(copy_concern, len(copy_concern))
-    recap_list = []
+    packs = deepcopy(data[topic][difficulty])
+    packs = sample(packs, len(packs))
+    recapitulations = []
     for pack in packs:
-        question = pack["question"]
-        reponses = pack["reponses"]
         correct = pack["correct"]
-        shuffle(reponses)
-        # Print question
-        print(question)
-        # Display response
-        display_responses(reponses)
-        # Flat is better than nested
-        while True:
-            choice = number_input("Your answser... > ")
-            answer = reponse_choice(reponses, choice)
-            if answer is not None:
-                break
-            print(f"{choice} is invalid.....")
-                
-
-        is_correct = (answer == correct)
+        reponses = deepcopy(pack["reponses"])
+        question = pack["question"]
+        print(f"\n{question}")
+        reponse = handle_response(reponses)
+        is_correct: bool = (reponse == correct)
         if is_correct:
             score += 1
-        recap = {
-            "Questions": question,
-            "Answers": answer,
-            "Corrections": "--" if is_correct else correct
-        }
-        recap_list.append(recap)
-    return score, recap_list
+        recap = handle_recap(question, reponse, correct, is_correct)
+        recapitulations.append(recap)
+    return score, recapitulations
 
 
 ##########################################################################################################
 # UTILS FUNCTIONS
-def topic_choice(data: Dict[str, Any], choice: int) -> Any:
-    topics: List[str] = list(data.keys())
-    if 1 <= choice <= len(topics):
-        return topics[choice - 1]
-    return None
+def handle_response(reponses: List[str]) -> str:
+    shuffle(reponses)  # Cause reponses is list
+    display_responses(reponses)
+    choice = number_input(f"Your answser (1-{len(reponses)}) > ", len(reponses))
+    return get_choice(reponses, choice)
 
 
-def difficulty_choice(data: Dict[str, Any], topic: str, choice: int) -> Any:
-    difficulties: List[str] = list(data[topic].keys())
-    if 1 <= choice <= len(difficulties):
-        return difficulties[choice - 1]
-    return None
+def handle_recap(question: str, answer: str, correct: str, is_correct: bool) -> Dict[str, str]:
+    return {
+        "Questions": question,
+        "Answers": answer,
+        "Corrections": "--" if is_correct else correct
+    }
 
 
-def reponse_choice(res: List[str], choice: int) -> Any:
-    if 1 <= choice <= len(res):
-        return res[choice - 1]
-    return None
+def get_choice(items: List[str], choice: int) -> str:
+    return items[choice - 1]
 
 
-def recapitulation(recap: Dict[str, Any]) -> None:
+def recapitulation(recap: List[Dict[str, str]]) -> None:
     print("\nRECAPITULATION\n",)
     table = tabulate(recap, headers="keys", tablefmt="pipe")
     print(table)
 
 
-def score_mention(score: int, res: str = "") -> None:
-    match score:
-        case 5:
-            res = "A"
-        case 4:
-            res = "B"
-        case 3:
-            res = "C"
-        case 2:
-            res = "D"
-        case 1:
-            res = "E"
-        case _:
-            res = "--"
-    print(f"\n Score >>> {res}")
-##########################################################################################################
+def score_mention(score: int, total: int) -> None:
+    perc = (score / total) * 100
+    if perc >= 85:
+        res = "A"
+    elif perc >= 70:
+        res = "B"
+    elif perc >= 50:
+        res = "C"
+    elif perc >= 30:
+        res = "D"
+    else:
+        res = "E"
+    print(f"\nYou final score >>> [{res}]")
+#########################################################################################################
 # DISPLAY CLI FUNCTIONS
 
 
@@ -205,13 +186,13 @@ def welcome(quiz: str) -> None:
     print(render)
 
 
-def display_topic(data: Dict[str, Any]) -> None:
+def display_topic(data: Quiz) -> None:
     print("Available Topics:\n",)
     for i, v in enumerate(data, start=1):
         print(f"({i}) - {v}")
 
 
-def display_difficulty(data: Dict[str, Any], topic: str) -> None:
+def display_difficulty(data: Quiz, topic: str) -> None:
     print("\nDifficulty stage:\n",)
     for i, v in enumerate(list(data[topic].keys()), start=1):
         print(f"({i}) - {v}")
@@ -225,28 +206,34 @@ def display_responses(res: List[str]) -> None:
 
 
 def main() -> None:
-    quiz_data: Dict[str, Any] = load_data(QUIZ_FILE)
+    data: Quiz = load_data(QUIZ_FILE)
+    topics = list(data.keys())
+    #
     welcome(quiz)
-    display_topic(quiz_data)
-
     while True:
-        choice_topic = number_input("\nChoice topic's number (1-3) > ")
-        topic = topic_choice(quiz_data, choice_topic)
-        if topic == None:
-            continue
-        print(topic)
-        display_difficulty(quiz_data, topic)
+        display_topic(data)
+        #
+        choice_topic = number_input(
+            f"\nChoice topic's number (1-{len(topics)}) > ", len(topics))
+        topic = get_choice(topics, choice_topic)
+        print(f"\n >>> Topic [{topic}]")
+        #
+        difficulties = list(data[topic].keys())
+        display_difficulty(data, topic)
         choice_difficulty = number_input(
-            "\nChoice difficulty's number (1-3) > ")
-        difficulty = difficulty_choice(quiz_data, topic, choice_difficulty)
-        if difficulty == None:
-            continue
-        print(difficulty)
-        score, recap = play_game(quiz_data, topic, difficulty)
-
-        score_mention(score)
+            f"\nChoice difficulty's number (1-{len(difficulties)}) > ", len(difficulties))
+        difficulty = get_choice(difficulties, choice_difficulty)
+        print(f"\n >>> Level [{difficulty}]")
+        #
+        score, recap = play_game(data, topic, difficulty)
+        #
+        total = len(data[topic][difficulty])
+        score_mention(score, total)
         recapitulation(recap)
-        break
+        conf = confirmation_input("Replay game ? (0=No / 1=Yes) > ")
+        if not conf:
+            print("\nSee you next...\n")
+            break
 
 
 ##########################################################################################################
@@ -256,34 +243,3 @@ if __name__ == "__main__":
         main()
     except KeyboardInterrupt:
         print("\nUser canceled the program by ctrl-c...\n")
-
-
-# def play_game(data: Dict[str, Any], topic: str, difficulty: str) -> Any:
-#     pointer, score = 0, 0
-#     copy_concern= deepcopy(data[topic][difficulty])
-#     pack = sample(copy_concern, len(copy_concern))
-#     recap_list = []
-#     while pointer < len(pack):
-#         question = pack[pointer]["question"]
-#         reponses = pack[pointer]["reponses"]
-#         shuffle(reponses)
-#         correct = pack[pointer]["correct"]
-#         print(question)
-#         display_responses(reponses)
-#         choice = number_input("Your answser... > ")
-#         res = reponse_choice(reponses, choice)
-#         if res is None:
-#             continue
-
-#         is_correct = (res == correct)
-#         if is_correct:
-#              score += 1
-#         recap = {
-#                 "Questions": question,
-#                 "Answers": res,
-#                 "Corrections": "--" if is_correct else correct
-#             }
-#         recap_list.append(recap)
-#         pointer += 1
-#         if pointer == len(pack):
-#             return score, recap_list
