@@ -160,14 +160,14 @@ def confirmation(text: str) -> bool:
 
 def string_input(text: str):
     name_pattern = r"^[a-zA-Z]{2,}$"
-    date_pattern = r"^\d{1,2}[/-]\d{1,2}\1\d{4}$"
+    date_pattern = r"^\d{1,2}([/-])\d{1,2}\1\d{4}$"
     while True:
-        data = input(text)
+        data = input(text).strip()
         mn = re.match(name_pattern, data)
         md = re.match(date_pattern, data)
-        if mn  or md :
-            return data     
-        print("Invalid Data retry")
+        if mn or md:
+            return data
+        print("Invalid Entry: \n\tName (2 char min and only string char) \n\tDate (xx/xx/xxxx or xx-xx-xxx)")
 
 
 ######################################################################################################
@@ -206,19 +206,21 @@ def add_event(name: str, date: str, data: Data) -> Data:
     return data
 
 
-def day_per_month(month: int, year: int, list_month: List[str]):
+def day_per_month(month: int, year: int, list_month: List[str], list_dom: List[int]) -> Tuple[str, List[str]]:
     try:
         for _ in list_month:
             if not list_month[month - 1]:
-                return []
+                return "", []
             if isleap(year):
-                list_of_dom[1] = 29
-            n = list_of_dom[month - 1]
+                list_dom[1] = 29
+            n = list_dom[month - 1]
     except ValueError:
         print("ValueError: Integer value is required...")
-        return []
+        return "", []
     else:
-        return list_month[month - 1], [str(i) for i in range(1, n + 1, 1)]
+        mois = list_month[month - 1]
+        dom = [str(i) for i in range(1, n + 1, 1)]
+        return mois, dom
 
 
 def fdow(y: int, m: int, d: int = 1) -> int:
@@ -240,17 +242,17 @@ def display_calendar(m: int, y: int) -> None:
     gap = 5
     space = "-"
     arr = []
-    day = ""
-    month, dom = day_per_month(m, y, list_of_months[:])
+    dow = ""
+    month, dom = day_per_month(m, y, list_of_months[:], list_of_dom[:])
     for i, n in enumerate(day_name):
         if fd == i:
             arr.append(space)
             arr *= i
-        day += f"{n:>{gap}}"
+        dow += f"{n:>{gap}}"
     arr += dom
     title = f"{month} {y}"
     print(f"{title:^35}")
-    print(day)
+    print(dow)
     for i, d in enumerate(arr):
         end = "\n" if (i+1) % 7 == 0 else ""
         d = f"[{d}]" if i + 1 == today(y, m) else d
