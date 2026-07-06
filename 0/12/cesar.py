@@ -23,7 +23,7 @@ d'une valeur N choisie par l'utilisateur. Encode et décode des messages.
 #################################################################################################
 # IMPORT
 from string import ascii_uppercase
-from typing import List, Tuple
+from typing import List
 from pyfiglet import Figlet
 import sys
 from tabulate import tabulate
@@ -31,8 +31,7 @@ from tabulate import tabulate
 #################################################################################################
 # GLOBAL VARIABLES
 
-ALPHABET: List[str] = [v for v in ascii_uppercase]
-MENU: List[str] = ["Decode message", "Force Brute",
+MENU: List[str] = ["Encode message", "Decode message", "Force Brute",
                    "Offset match table", "Exit programm"]
 FONT = "mono9"
 
@@ -58,7 +57,10 @@ def menu_input(text: str, length: int) -> int:
 def offset_input(text: str) -> int:
     while True:
         try:
-            return int(input(text))
+            value = int(input(text))
+            if 0 <= value <= 25:
+                return value
+            print(f"Error > Value must be between 1-25...")
         except ValueError:
             print("ValueError > Enter integer value only...\n")
 
@@ -77,85 +79,81 @@ def confirmation(text: str) -> bool:
 # ALGORYTHMES
 
 
-def encode(dec: int, msg: str) -> str:
-    offset = offset_letters(dec, ALPHABET)
-    for ch in msg:
-        if ch.upper() in ALPHABET:
-            nch = offset[ALPHABET.index(ch.upper())]
-            nch = nch.lower() if ch.islower() else nch.upper()
-            msg = msg.replace(ch, nch)
-    return msg
+def cesar_handle(msg: str, shift: int) -> str:
+    result = []
+    for char in msg:
+        if char.isalpha():
+            s = ord("A") if char.isupper() else ord("a")
+            alpha_range = ord(char) - s
+            modulo = (alpha_range + shift) % 26
+            newchar = chr(s + modulo)
+            result.append(newchar)
+            print(alpha_range, modulo, char, newchar)
+        else:
+            result.append(char)
+    return "".join(result)
 
 
-def decode(dec: int, msg: str) -> str:
-    # je VeUx Tr3 ->  PuL mh YhXa Wu3
-    offset = offset_letters(dec, ALPHABET)
-    for ch in msg:
-        if ch.upper() in offset:
-            nch = ALPHABET[offset.index(ch.upper())]
-            nch = nch.lower() if ch.islower() else nch.upper()
-            msg = msg.replace(ch, nch)
-    return msg
-
-
-def brute_force() -> None:
-    pass
-#################################################################################################
-# UTILS
-
-
-def offset_letters(dec: int, alphabet: list[str]) -> list[str]:
-    offset_alphabet = []
-    for i, v in enumerate(alphabet):
-        mod = (i + dec) % len(alphabet)
-        v = v.replace(v, alphabet[mod])
-        offset_alphabet.append(v)
-    return offset_alphabet
-
+def brute_force(msg: str) -> None:
+    for shift in range(26):
+        decrypt = cesar_handle(msg, -shift)
+        print(f"Shift -{shift:02d} : {decrypt}")
+    print("-"*25,)
 
 #################################################################################################
 # DISPLAY
+
+
 def welcome() -> None:
     f = Figlet(font=FONT)
     print(f.renderText("CESAR"),)
 
 
 def display_menu(menu: List[str]) -> None:
+    print("-"*25,)
     for i, v in enumerate(menu, start=1):
         print(f"{i} : {v}")
-    print("-"*20,)
+    print("-"*25,)
 
 
-def dislay_table(dec) -> None:
-    offset = offset_letters(dec, ALPHABET)
-    table = {"Alphabet": ALPHABET, "Cesar code": offset}
+def display_table(shift) -> None:
+    alphabet = list(ascii_uppercase)
+    cesaret = [cesar_handle(l, shift) for l in alphabet]
+    table = {"Alphabet": alphabet, "Cesar code": cesaret}
     print(tabulate(table, headers="keys", tablefmt="pretty"))
+
+
 #################################################################################################
 # MAIN PROGRAMM
 
 
 def main() -> None:
-
     welcome()
-    dec = offset_input("Enter cesar offset > ")
-    print(f"\nOffset: [{dec}]\n",)
-    msg = string_input("Enter your message > ")
-    msg_encoded = encode(dec, msg)
-    print(f"\nEncoded message > {msg_encoded}\n",)
+    print(cesar_handle("papa de pap 12", 3))
+    #
+    shift = offset_input("Enter cesar offset > ")
+    print(f"\nCesar shift >>> [{shift}]\n",)
+    #
     while True:
+        #
         display_menu(MENU)
         choice = menu_input(f"Entrer choice (1-{len(MENU)}) > ", len(MENU))
+        title = MENU[choice - 1]
+        print(f"\nChoice > [{title}]",)
+        #
         if choice == 1:
-            msg_decoded = decode(dec, msg_encoded)
-            print(f"\n[{MENU[choice - 1]}] > {msg_decoded}\n",)
+            text = string_input("Enter text to ENCODE > ")
+            print(f"\nResult >>> {cesar_handle(text, shift)}\n")
         elif choice == 2:
-            print(f"\n[{MENU[choice - 1]}]",)
+            text = string_input("Enter text to DECODE > ")
+            print(f"\nResult >>> {cesar_handle(text, -shift)}\n")
         elif choice == 3:
-            print(f"\n[{MENU[choice - 1]}]",)
-            dislay_table(dec)
+            text = string_input("Enter your message > ")
+            brute_force(text)
+        elif choice == 4:
+            display_table(shift)
         else:
-            print(f"\n[{MENU[choice - 1]}]",)
-            conf = confirmation("Confirm programm exist (0-1) ? ")
+            conf = confirmation("Confirm programm exist (0=No / 1=Yes) ? ")
             if conf:
                 print("\nGoobye, see you later...",)
                 sys.exit(0)
